@@ -88,7 +88,7 @@ exports.graphContactPost = (user)=>{
 exports.graphContactPut =async (user)=>{
     console.log(user)
     await Contact.updateOne({_id:user.id}, {$set:{...user}})
-    const edit = Contact.findById(user.id);
+    const edit =  await Contact.findById(user.id);
     return {msg : "user updated" , edit}
 }
 // exports.updateContact = async(req , res)=>{

@@ -1,16 +1,24 @@
 // step 1 : run server
 const express =require("express");
 require("dotenv").config({path:"./config/.env"});
-const connectDB = require('.//config/connectDB');
-const contactRouter = require("./router/contactRouter");
+//------OLD Rest API with Mongo
+// const connectDB = require('.//config/connectDB');
+// const contactRouter = require("./router/contactRouter");
+
+//import SQL Config
+const {testDbConnection} = require("./SQL/configSQL/db");
+// const ContactsSqls = require("./SQL/model/ContactSQL");
 
 //require and declare graph Schema
 const {schema} = require("./graphql/graphqlSchema");
 //graph express to build end point
 const {graphqlHTTP} = require("express-graphql");
 
-//connect Database
-connectDB()
+//connect Database MongoDB
+// connectDB()
+
+// run dbSQL connection function
+testDbConnection();
 
 // step 2 : run server
 const app = express();
@@ -26,6 +34,15 @@ app.use("/graphql",graphqlHTTP({
 //create route 
 // app.use('/api/contact' , contactRouter);
 
+
+//  ContactsSqls.create({
+//     email: "mike@example.com",
+//     name: "mike  Smith",
+//     phone: "000000001",
+//     // employed: true,
+//   });
+
+//  ContactsSqls.findAll().then((res)=>console.log(res));
 
 // step 3 : run server 
 const PORT = process.env.PORT || 4006 ;

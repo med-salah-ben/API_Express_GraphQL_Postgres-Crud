@@ -8,6 +8,8 @@ const {
 
 //require Mongoose Contollers
 const contactContollers = require("../controllers/ContactControllers");
+//import SQL Contact Controllers
+const ContactControllersSQL = require("../SQL/ControllersSql/ContactsControllersSql");
 
 // declare the Contact Type => One Contact in Our List
 const contactType = new GraphQLObjectType({
@@ -97,12 +99,12 @@ const mutationsType = new GraphQLObjectType({
           email: args.email,
           phone: args.phone,
         };
-        return contactContollers.graphContactPost(newContact);
+        return ContactControllersSQL.graphContactPostPostgres(newContact);
       },
     },
     EditContact: {
       type: contactType,
-      description: "Edit contact",
+      description: "Edit contact : ",
       args: {
         id: {
           type: GraphQLID,
@@ -119,7 +121,8 @@ const mutationsType = new GraphQLObjectType({
           email: args.email,
           phone: args.phone,
         };
-        return contactContollers.graphContactPut(newData);
+        contactContollers.graphContactPut(newData);
+        return newData
       },
     },
   },
