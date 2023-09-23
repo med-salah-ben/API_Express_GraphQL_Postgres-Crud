@@ -91,19 +91,44 @@ const mutationsType = new GraphQLObjectType({
         email: { type: GraphQLString },
         phone: { type: GraphQLString },
       },
-      resolve:(_,args)=>{
-        const newContact ={name:args.name, email:args.email , phone:args.phone}
-        return contactContollers.graphContactPost(newContact)
-      }
+      resolve: (_, args) => {
+        const newContact = {
+          name: args.name,
+          email: args.email,
+          phone: args.phone,
+        };
+        return contactContollers.graphContactPost(newContact);
+      },
+    },
+    EditContact: {
+      type: contactType,
+      description: "Edit contact",
+      args: {
+        id: {
+          type: GraphQLID,
+          description: "this is the id of our Contact",
+        },
+        name: { type: GraphQLString, description: "this is the name" },
+        email: { type: GraphQLString },
+        phone: { type: GraphQLString },
+      },
+      resolve: (_, args) => {
+        const newData = {
+            id: args.id,
+          name: args.name,
+          email: args.email,
+          phone: args.phone,
+        };
+        return contactContollers.graphContactPut(newData);
+      },
     },
   },
-
 });
 
 //Our Schema
 const schema = new GraphQLSchema({
   query: queryType,
-  mutation:mutationsType
+  mutation: mutationsType,
 });
 
 exports.schema = schema;

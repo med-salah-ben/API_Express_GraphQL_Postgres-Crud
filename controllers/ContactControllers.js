@@ -84,3 +84,19 @@ exports.graphContactPost = (user)=>{
     const newContact = new Contact(user)
     return  newContact.save()
 }
+
+exports.graphContactPut =async (user)=>{
+    console.log(user)
+    await Contact.updateOne({_id:user.id}, {$set:{...user}})
+    const edit = Contact.findById(user.id);
+    return {msg : "user updated" , edit}
+}
+// exports.updateContact = async(req , res)=>{
+//     try {
+//         await Contact.updateOne({_id:req.params.id}, {$set:{...req.body}})
+//         return res.status(200).send({msg:'contact updated...'})
+//     } catch (error) {
+//         console.log(error)
+//         return res.status(500).send('cant update')
+//     }
+// }
