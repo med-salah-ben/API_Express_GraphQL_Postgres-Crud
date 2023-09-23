@@ -18,7 +18,7 @@ const contactType = new GraphQLObjectType({
   // fields of Our Contact
   fields: {
     //- we need to take our var like the same in our database Schema
-    _id: { type: GraphQLID, description: "this is the ID" },
+    id: { type: GraphQLID, description: "this is the ID" },
     name: { type: GraphQLString, description: "this is the name" },
     email: { type: GraphQLString },
     phone: { type: GraphQLString },
@@ -45,7 +45,7 @@ const queryType = new GraphQLObjectType({
       // }
       //-------If we want to return all Contact make function that return all contact
       resolve: (_, args) => {
-        return contactContollers.graphContactFind();
+        return ContactControllersSQL.graphContactFindPostgres();
       },
     },
     oneContactById: {
@@ -59,7 +59,7 @@ const queryType = new GraphQLObjectType({
       },
       //-------If we want to return One Contact make function that return One contact in Controllers and import it
       resolve: (_, args) => {
-        return contactContollers.graphContactFindByID(args.id);
+        return ContactControllersSQL.graphContactFindByIDPostgres(args.id);
       },
     },
     oneContactByEmail: {
@@ -74,7 +74,7 @@ const queryType = new GraphQLObjectType({
       },
       //-------If we want to return One Contact make function that return One contact in Controllers and import it
       resolve: (_, args) => {
-        return contactContollers.graphContactFindByEmail(args.email);
+        return ContactControllersSQL.graphContactFindByEmailPostgres(args.email);
       },
     },
   },
@@ -89,12 +89,14 @@ const mutationsType = new GraphQLObjectType({
       type: contactType,
       description: "add contact",
       args: {
+        id:{ type: GraphQLID },
         name: { type: GraphQLString, description: "this is the name" },
         email: { type: GraphQLString },
         phone: { type: GraphQLString },
       },
       resolve: (_, args) => {
         const newContact = {
+          id: args.id,
           name: args.name,
           email: args.email,
           phone: args.phone,
@@ -114,15 +116,15 @@ const mutationsType = new GraphQLObjectType({
         email: { type: GraphQLString },
         phone: { type: GraphQLString },
       },
-      resolve: (_, args) => {
+      resolve: async(_, args) => {
         const newData = {
             id: args.id,
           name: args.name,
           email: args.email,
           phone: args.phone,
         };
-        contactContollers.graphContactPut(newData);
-        return newData
+        const test =  await ContactControllersSQL.graphContactPutPostgres(newData);
+        return test
       },
     },
   },
