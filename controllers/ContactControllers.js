@@ -78,3 +78,9 @@ exports.graphContactFindByID = (id)=>{
 exports.graphContactFindByEmail = (email)=>{
     return Contact.findOne({email:email})
 }
+
+exports.graphContactPost = (user)=>{
+    console.log(user)
+    const newContact = new Contact(user)
+    return  newContact.save()
+}
