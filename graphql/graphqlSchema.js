@@ -6,8 +6,9 @@ const {
   GraphQLID,
 } = require("graphql");
 
-//require Mongoose Contollers
-const contactContollers = require("../controllers/ContactControllers");
+//Validation Errors
+const { errorName } = require("../SQL/constant/constant");
+
 //import SQL Contact Controllers
 const ContactControllersSQL = require("../SQL/ControllersSql/ContactsControllersSql");
 
@@ -44,8 +45,14 @@ const queryType = new GraphQLObjectType({
       //     return [{name:"test"}]
       // }
       //-------If we want to return all Contact make function that return all contact
-      resolve: (_, args) => {
-        return ContactControllersSQL.graphContactFindPostgres();
+      resolve: async(_, args) => {
+        try {
+          const result =await ContactControllersSQL.graphContactFindPostgres();
+          return result;
+        } catch (error) {
+          throw new Error(errorName.SERVER_ERROR);
+        }
+        
       },
     },
     oneContactById: {
@@ -58,8 +65,23 @@ const queryType = new GraphQLObjectType({
         },
       },
       //-------If we want to return One Contact make function that return One contact in Controllers and import it
-      resolve: (_, args) => {
-        return ContactControllersSQL.graphContactFindByIDPostgres(args.id);
+      resolve: async (_, args) => {
+        if (!args.id) {
+          throw new Error(errorName.ID_IS_REQUIRED);
+        }
+        const isExist =
+          await ContactControllersSQL.graphContactFindByIDPostgres(args.id);
+        console.log("isExist : ", isExist);
+        if (!isExist) {
+          console.log("isExist2 : ", isExist);
+          throw new Error(errorName.ID_NOT_EXIST);
+        }
+        try {
+          return isExist;
+        } catch (error) {
+          console.log("isExist33 : ");
+          throw new Error(errorName.SERVER_ERROR);
+        }
       },
     },
     oneContactByEmail: {
@@ -73,8 +95,22 @@ const queryType = new GraphQLObjectType({
         },
       },
       //-------If we want to return One Contact make function that return One contact in Controllers and import it
-      resolve: (_, args) => {
-        return ContactControllersSQL.graphContactFindByEmailPostgres(args.email);
+      resolve: async (_, args) => {
+        if (!args.email) {
+          throw new Error(errorName.EMAIL_IS_REQUIRED);
+        }
+        const isExist =
+          await ContactControllersSQL.graphContactFindByEmailPostgres(
+            args.email
+          );
+        if (!isExist) {
+          throw new Error(errorName.EMAIL_NOT_EXIST);
+        }
+        try {
+          return isExist;
+        } catch (error) {
+          throw new Error(errorName.SERVER_ERROR);
+        }
       },
     },
   },
@@ -89,19 +125,38 @@ const mutationsType = new GraphQLObjectType({
       type: contactType,
       description: "add contact",
       args: {
-        id:{ type: GraphQLID },
+        id: { type: GraphQLID },
         name: { type: GraphQLString, description: "this is the name" },
         email: { type: GraphQLString },
         phone: { type: GraphQLString },
       },
-      resolve: (_, args) => {
+      resolve: async (_, args) => {
         const newContact = {
           id: args.id,
           name: args.name,
           email: args.email,
           phone: args.phone,
         };
-        return ContactControllersSQL.graphContactPostPostgres(newContact);
+
+        if (!args.email || !args.name || !args.phone) {
+          throw new Error(errorName.FIELDS_REQUIRED);
+        }
+        const result =
+          await ContactControllersSQL.graphContactFindByEmailPostgres(
+            args.email
+          );
+        // console.log(result)
+        if (result) {
+          throw new Error(errorName.USER_ALREADY_EXISTS);
+        } else {
+          try {
+            await ContactControllersSQL.graphContactPostPostgres(newContact);
+            return newContact;
+          } catch (error) {
+            // console.error(err);
+            throw new Error(errorName.SERVER_ERROR);
+          }
+        }
       },
     },
     EditContact: {
@@ -116,15 +171,33 @@ const mutationsType = new GraphQLObjectType({
         email: { type: GraphQLString },
         phone: { type: GraphQLString },
       },
-      resolve: async(_, args) => {
+      resolve: async (_, args) => {
         const newData = {
-            id: args.id,
+          id: args.id,
           name: args.name,
           email: args.email,
           phone: args.phone,
         };
-        const test =  await ContactControllersSQL.graphContactPutPostgres(newData);
-        return test
+        if(!args.id){
+          throw new Error(errorName.ID_IS_REQUIRED);
+        }
+        const result =
+        await ContactControllersSQL.graphContactFindByIDPostgres(
+          args.id
+        );
+      // console.log(result)
+      if (!result) {
+        throw new Error(errorName.ID_NOT_EXIST);
+      } else {
+        try {
+          const test = await ContactControllersSQL.graphContactPutPostgres(
+            newData
+          );
+          return test;
+        } catch (error) {
+          throw new Error(errorName.SERVER_ERROR);
+        }
+      }
       },
     },
     deleteContactById: {
@@ -137,8 +210,25 @@ const mutationsType = new GraphQLObjectType({
         },
       },
       //-------If we want to delete One Contact make function that return One contact in Controllers and import it
-      resolve: (_, args) => {
-        return ContactControllersSQL.graphContactDeletePostgres(args.id);
+      resolve: async (_, args) => {
+        if (!args.id) {
+          throw new Error(errorName.ID_IS_REQUIRED);
+        }
+
+        const isExist =
+          await ContactControllersSQL.graphContactFindByIDPostgres(args.id);
+        if (!isExist) {
+          throw new Error(errorName.ID_NOT_EXIST);
+        }else{
+          try {
+            await ContactControllersSQL.graphContactDeletePostgres(args.id);
+            console.log(true);
+            return true;
+          } catch (error) {
+            throw new Error(errorName.SERVER_ERROR);
+          }
+        }
+
       },
     },
   },

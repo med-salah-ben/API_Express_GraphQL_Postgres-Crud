@@ -1,10 +1,10 @@
 const ContactsSqls = require("../model/ContactSQL");
+
 ////--------graph method with Postgres
 
 //insert Contact
 exports.graphContactPostPostgres = (user)=>{
-    
-    return  ContactsSqls.create(user)
+  return  ContactsSqls.create(user)
 }
 
 // select Contacts 
@@ -21,13 +21,9 @@ exports.graphContactFindByIDPostgres = (id)=>{
       }
 }
 
-exports.graphContactFindByEmailPostgres = async(email)=>{
-    const contact =  await ContactsSqls.findOne({ where: { email: email} })
-    if (contact === null) {
-        return "there is no Contact with this email"
-      } else {
-        return contact
-      }
+exports.graphContactFindByEmailPostgres = (email)=>{
+    return  ContactsSqls.findOne({ where: { email: email} })
+ 
 }
 
 
@@ -42,8 +38,11 @@ exports.graphContactPutPostgres =async (user)=>{
 }
 
 exports.graphContactDeletePostgres =async (id)=>{
-        await ContactsSqls.destroy({
+       const result = await ContactsSqls.destroy({
         where: {
           id: id
         }})
+        // if (!result) {
+        //   return {msg : ""}
+        // }
 }

@@ -5,6 +5,8 @@ require("dotenv").config({path:"./config/.env"});
 // const connectDB = require('.//config/connectDB');
 // const contactRouter = require("./router/contactRouter");
 
+const {errorType} = require('./SQL/constant/constant')
+
 //import SQL Config
 const {testDbConnection} = require("./SQL/configSQL/db");
 // const ContactsSqls = require("./SQL/model/ContactSQL");
@@ -25,12 +27,23 @@ const app = express();
 //middelware to body parse
 app.use(express.json());
 
+// Error Fuction
+const getErrorCode = errorName => {
+    return errorType[errorName]
+  }
+
 //use Graph middelware to replace route
 // graphqlHTTP function take 2 parameter
-app.use("/graphql",graphqlHTTP({
+app.use("/graphql", (req, res) => {
+    graphqlHTTP({
     schema,
-    graphiql:true // like postman to test our request
-}))
+    graphiql:true, // like postman to test our request
+    context: { req },
+    customFormatErrorFn: (err) => {
+      const error = getErrorCode(err.message)
+      return ({ message: error.message, statusCode: error.statusCode })
+    }
+})(req, res)})
 //create route 
 // app.use('/api/contact' , contactRouter);
 
