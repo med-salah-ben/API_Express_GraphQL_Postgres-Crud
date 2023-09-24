@@ -127,6 +127,20 @@ const mutationsType = new GraphQLObjectType({
         return test
       },
     },
+    deleteContactById: {
+      type: contactType,
+      description: "this is the delete contact By ID",
+      args: {
+        id: {
+          type: GraphQLID,
+          description: "this is the id of our Contact",
+        },
+      },
+      //-------If we want to delete One Contact make function that return One contact in Controllers and import it
+      resolve: (_, args) => {
+        return ContactControllersSQL.graphContactDeletePostgres(args.id);
+      },
+    },
   },
 });
 
